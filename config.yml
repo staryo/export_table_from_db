@@ -1,0 +1,20 @@
+query: |
+  select * from table
+
+db:
+  database: postgres
+  database_server: 0.0.0.0
+  database_port: 5432
+  database_login: login
+  database_password: password
+
+output_db:
+  database: postgres
+  database_server: 0.0.0.1
+  database_port: 5432
+  database_login: login
+  database_password: password
+  table: test
+  replace: replace # replace -- заменить, append -- дописать
+
+output_file: /home/folder
