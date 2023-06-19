@@ -10,6 +10,8 @@ from yaml import SafeLoader, load
 import sqlalchemy.sql.default_comparator
 import psycopg2
 
+from version import version_description
+
 
 def read_config(config_filepath):
     with open(config_filepath, 'r', encoding="utf-8") as f:
@@ -71,8 +73,7 @@ def save_to_pg(db_config, df, name, replace):
 if __name__ == '__main__':
 
     parser = ArgumentParser(
-        description='Инструмент получения данных из БД и '
-                    'сохранения куда-то еще'
+        description=version_description
     )
     parser.add_argument('-c', '--config', required=False,
                         default=join(getcwd(), 'config.yml'))
