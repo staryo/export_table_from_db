@@ -101,5 +101,3 @@ if __name__ == '__main__':
     new_df.to_excel(f"{config['output_file']}.xlsx")
     tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
     new_df.to_json(f"{config['output_file']}.json")
-    tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
-    new_df.to_xml(f"{config['output_file']}.json")

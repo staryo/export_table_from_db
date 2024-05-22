@@ -166,7 +166,7 @@ class IAImportExport(Base):
             if phase_identity not in self.cache['first_operation_identity']:
                 tqdm.write(f'Не нашли первую операцию '
                            f'маршрута для {phase_identity}')
-                print(self.cache['first_operation_identity'])
+                # print(self.cache['first_operation_identity'])
             return self.cache['first_operation_identity'].get(phase_identity)
 
         self.cache['first_operation_identity'] = {}
@@ -206,7 +206,7 @@ class IAImportExport(Base):
             if phase_identity not in self.cache['last_operation_identity']:
                 tqdm.write(f'Не нашли последнюю операцию '
                            f'маршрута для {phase_identity}')
-                print(self.cache['last_operation_identity'])
+                # print(self.cache['last_operation_identity'])
             return self.cache['last_operation_identity'].get(phase_identity)
 
         self.cache['last_operation_identity'] = {}
