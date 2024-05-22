@@ -1,6 +1,6 @@
 pandas==1.5.2
 SQLAlchemy==1.4.44
-psycopg2~=2.9.3
+psycopg2~=2.9.9
 PyYAML~=6.0
 openpyxl
 
