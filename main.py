@@ -112,17 +112,22 @@ if __name__ == '__main__':
             config['output_db']['replace'],
         )
 
-    try:
-        tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
-        new_df.to_xml(f"{config['output_file']}.xml")
-    except ValueError:
-        tqdm.write('В XML сохранить не получилось -- '
-                   'возможно поля на русском языке')
+    if config.get('csv', True):
+        tqdm.write(f"Сохраняем в файл {config['output_file']}.csv")
+        new_df.to_csv(f"{config['output_file']}.csv")
 
-    tqdm.write(f"Сохраняем в файл {config['output_file']}.csv")
-    new_df.to_csv(f"{config['output_file']}.csv")
-    tqdm.write(f"Сохраняем в файл {config['output_file']}.xlsx")
-    new_df.to_excel(f"{config['output_file']}.xlsx")
-    tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
-    new_df.to_json(f"{config['output_file']}.json")
+    if config.get('xlsx', True):
+        tqdm.write(f"Сохраняем в файл {config['output_file']}.xlsx")
+        new_df.to_excel(f"{config['output_file']}.xlsx")
 
+    if config.get('json', True):
+        tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
+        new_df.to_json(f"{config['output_file']}.json")
+
+    if config.get('xml', True):
+        try:
+            tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
+            new_df.to_xml(f"{config['output_file']}.xml")
+        except ValueError:
+            tqdm.write('В XML сохранить не получилось -- '
+                       'возможно поля на русском языке')
