@@ -4,6 +4,8 @@ from logging import basicConfig, DEBUG, INFO
 from os import getcwd
 from os.path import join
 from urllib import parse
+from tqdm import tqdm
+
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -51,9 +53,17 @@ if __name__ == '__main__':
 
     result = script(config['db'], config['query'])
 
-    result.to_csv('result.csv')
-    result.to_excel('result.xlsx')
-    result.to_json('result.json', orient='records', date_format='iso')
-    if 'key' in config:
-        with open('result_key.json', 'w') as f:
-            json.dump(result.to_dict(orient='list')[config['key']], f)
+    if config.get('csv', True):
+        tqdm.write(f"Сохраняем в файл {config['output_file']}.csv")
+        result.to_csv(f"{config['output_file']}.csv")
+
+    if config.get('xlsx', True):
+        tqdm.write(f"Сохраняем в файл {config['output_file']}.xlsx")
+        result.to_excel(f"{config['output_file']}.xlsx")
+
+    if config.get('json', True):
+        tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
+        result.to_json(f"{config['output_file']}.json", orient='records', date_format='iso')
+        if 'key' in config:
+            with open(f"{config['output_file']}.json", 'w') as f:
+                json.dump(result.to_dict(orient='list')[config['key']], f)
