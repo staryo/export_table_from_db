@@ -65,8 +65,12 @@ if __name__ == '__main__':
                 row[1]['operation_id'] = ''
                 row[1]['operation_progress'] = 100
                 row[1]['batch_id'] = f"{row[1]['batch_id']}_done"
+                row[1]['operation_number'] = ''
             if row[1]['#operation_name'] == 'ERP_FINISHED':
                 row[1]['operation_id'] = ia.get_last_phase_operation(row[1]['#route_phase'])
+                row[1]['operation_number'] = ia.get_last_phase_operation_number(
+                    row[1]['#route_phase']
+                )
                 row[1]['operation_progress'] = 100
                 try:
                     if row[1]['#route_phase'] == ia.get_entity_first_phase(
@@ -78,6 +82,7 @@ if __name__ == '__main__':
                     pass
             if row[1]['#operation_name'] == 'STOCK':
                 row[1]['operation_id'] = ia.get_first_phase_operation(row[1]['#route_phase'])
+                row[1]['operation_number'] = ''
                 try:
                     if row[1]['#route_phase'] == ia.get_entity_first_phase(
                             ia.get_entity_id(row[1]['code'])
@@ -89,6 +94,10 @@ if __name__ == '__main__':
 
             if row[1]['amount'] > 0:
                 final_result.append(row[1])
+            if row[1]['operation_id']:
+                row[1]['code'] = ia.get_entity_with_operation_identity(
+                    row[1]['operation_id']
+                )
         final_result = [
             {k.upper(): v for k, v in row.items()}
             for row in final_result
@@ -101,5 +110,5 @@ if __name__ == '__main__':
     new_df.to_excel(f"{config['output_file']}.xlsx")
     tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
     new_df.to_json(f"{config['output_file']}.json")
-    tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
-    new_df.to_xml(f"{config['output_file']}.json")
+    # tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
+    # new_df.to_xml(f"{config['output_file']}.json")

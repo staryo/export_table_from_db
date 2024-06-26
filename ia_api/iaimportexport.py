@@ -155,8 +155,8 @@ class IAImportExport(Base):
                                f'операции {operation["identity"]}')
                 continue
             self.cache['phase_identity'][op_id] = entity_routes_phases_dict[
-                    operation['entity_route_phase_id']
-                ]['identity']
+                operation['entity_route_phase_id']
+            ]['identity']
 
         return self.cache['phase_identity'].get(operation_id)
 
@@ -240,6 +240,46 @@ class IAImportExport(Base):
 
         return self.cache['last_operation_identity'].get(phase_identity)
 
+    def get_last_phase_operation_number(self, phase_identity):
+
+        if 'last_operation_number' in self.cache:
+            if phase_identity not in self.cache['last_operation_number']:
+                tqdm.write(f'Не нашли последнюю операцию '
+                           f'маршрута для {phase_identity}')
+                print(self.cache['last_operation_number'])
+            return self.cache['last_operation_number'].get(phase_identity)
+
+        self.cache['last_operation_number'] = {}
+
+        operation_dict = list_to_dict(sorted(
+            self._get_from_rest_collection('operation'),
+            key=lambda k: k['nop']
+        ))
+
+        entity_routes_phases_dict = list_to_dict(
+            self._get_from_rest_collection('entity_route_phase')
+        )
+
+        for op_id, operation in operation_dict.items():
+            if operation['entity_route_phase_id'] is None:
+                if '(' not in operation['identity']:
+                    tqdm.write(f'Не найдена фаза для '
+                               f'операции {operation["identity"]}')
+                continue
+            cur_phase_identity = entity_routes_phases_dict[
+                operation['entity_route_phase_id']
+            ]['identity']
+            if cur_phase_identity not in self.cache['last_operation_number']:
+                self.cache['last_operation_number'][cur_phase_identity] = \
+                    f"{operation['nop']}"
+            if f"{cur_phase_identity}_{operation['nop']}" > \
+                    self.cache['last_operation_number'][cur_phase_identity]:
+                self.cache['last_operation_number'][
+                    cur_phase_identity
+                ] = f"{operation['nop']}"
+
+        return self.cache['last_operation_number'].get(phase_identity)
+
     def get_entity_last_phase(self, entity_id):
         if 'main_routes' not in self.cache:
             entity_routes = self._get_from_rest_collection(
@@ -284,7 +324,29 @@ class IAImportExport(Base):
 
         return self.get_phase_with_operation_id(operation['id'])
 
+    def get_entity_with_operation_identity(self, operation_identity):
+        entity_routes_dict = list_to_dict(self._get_from_rest_collection(
+            'entity_route'
+        ))
+        entity_dict = list_to_dict(self._get_from_rest_collection(
+            'entity'
+        ))
+        operation_dict = list_to_dict(
+            self._get_from_rest_collection('operation'),
+            key_column='identity'
+        )
+        return entity_dict[
+            entity_routes_dict[
+                operation_dict[
+                    operation_identity
+                ]['entity_route_id']
+            ]['entity_id']
+        ]['identity']
+
     def get_entity_first_phase(self, entity_id):
+        entity_routes_dict = list_to_dict(self._get_from_rest_collection(
+            'entity_route'
+        ))
         if 'main_routes' not in self.cache:
             entity_routes = self._get_from_rest_collection(
                 'entity_route'
@@ -316,14 +378,22 @@ class IAImportExport(Base):
             for row in operations:
                 self.cache[
                     'first_operations_entity_route_id'
-                ][row['entity_route_id']] = row
+                ][
+                    entity_routes_dict[
+                        row['entity_route_id']
+                    ]['identity'][:13]
+                ] = row
 
         first_operations_entity_route_id = self.cache[
             'first_operations_entity_route_id'
         ]
 
         try:
-            operation = first_operations_entity_route_id[entity_route_id]
+            operation = first_operations_entity_route_id[
+                entity_routes_dict[
+                    entity_route_id
+                ]['identity'][:13]
+            ]
         except IndexError:
             return None
 
