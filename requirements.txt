@@ -10,7 +10,8 @@ urllib3==1.26.13
 uvicorn~=0.20.0
 fastapi==0.88.0
 pydantic~=1.10.2
-pyodbc==4.0.35
+pyodbc~=5.1.0
 charset-normalizer
 chardet
 lxml
+numpy

@@ -11,6 +11,7 @@ import sqlalchemy.sql.default_comparator
 import psycopg2
 
 from version import version_description
+from urllib import parse
 
 
 def read_config(config_filepath):
@@ -19,13 +20,22 @@ def read_config(config_filepath):
 
 
 def script(db_config, query):
-    engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(
-        db_config['database_login'],
-        db_config['database_password'],
-        db_config['database_server'],
-        db_config['database_port'],
-        db_config['database']
-    ))
+    if db_config.get('type') == 'mssql':
+        engine = create_engine(
+            'mssql+pyodbc://{}:{}@{}/{}?driver=ODBC+Driver+17+for+SQL+Server'.format(
+                db_config['database_login'],
+                parse.quote_plus(db_config['database_password']),
+                db_config['database_server'],
+                db_config['database']
+            ))
+    else:
+        engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(
+            db_config['database_login'],
+            db_config['database_password'],
+            db_config['database_server'],
+            db_config['database_port'],
+            db_config['database']
+        ))
 
     result = pd.read_sql(
         query,
@@ -39,13 +49,22 @@ def save_to_pg(db_config, df, name, replace):
     def chunker(seq, size):
         return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
-    engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(
-        db_config['database_login'],
-        db_config['database_password'],
-        db_config['database_server'],
-        db_config['database_port'],
-        db_config['database']
-    ))
+    if db_config.get('type') == 'mssql':
+        engine = create_engine(
+            'mssql+pyodbc://{}:{}@{}/{}?driver=ODBC+Driver+17+for+SQL+Server'.format(
+                db_config['database_login'],
+                parse.quote_plus(db_config['database_password']),
+                db_config['database_server'],
+                db_config['database']
+            ))
+    else:
+        engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(
+            db_config['database_login'],
+            db_config['database_password'],
+            db_config['database_server'],
+            db_config['database_port'],
+            db_config['database']
+        ))
     print('Database session created')
     chunksize = 100
     df = pd.DataFrame(df)
@@ -98,11 +117,14 @@ if __name__ == '__main__':
                 config['db'],
                 config['query'].format(args.params)
             )
-    else:
+    elif 'db' in config:
         new_df = script(
             config['db'],
             config['query']
         )
+
+    else:
+        new_df = pd.read_excel(config['input_file'])
 
     if 'output_db' in config:
         save_to_pg(
@@ -112,22 +134,20 @@ if __name__ == '__main__':
             config['output_db']['replace'],
         )
 
-    if config.get('csv', True):
-        tqdm.write(f"Сохраняем в файл {config['output_file']}.csv")
-        new_df.to_csv(f"{config['output_file']}.csv")
-
-    if config.get('xlsx', True):
-        tqdm.write(f"Сохраняем в файл {config['output_file']}.xlsx")
-        new_df.to_excel(f"{config['output_file']}.xlsx")
-
-    if config.get('json', True):
-        tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
-        new_df.to_json(f"{config['output_file']}.json")
-
-    if config.get('xml', True):
-        try:
-            tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
-            new_df.to_xml(f"{config['output_file']}.xml")
-        except ValueError:
-            tqdm.write('В XML сохранить не получилось -- '
-                       'возможно поля на русском языке')
+    if config.get('output_file'):
+        if config.get('csv', True):
+            tqdm.write(f"Сохраняем в файл {config['output_file']}.csv")
+            new_df.to_csv(f"{config['output_file']}.csv")
+        if config.get('xlsx', True):
+            tqdm.write(f"Сохраняем в файл {config['output_file']}.xlsx")
+            new_df.to_excel(f"{config['output_file']}.xlsx")
+        if config.get('json', True):
+            tqdm.write(f"Сохраняем в файл {config['output_file']}.json")
+            new_df.to_json(f"{config['output_file']}.json")
+        if config.get('xml', True):
+            try:
+                tqdm.write(f"Сохраняем в файл {config['output_file']}.xml")
+                new_df.to_xml(f"{config['output_file']}.xml")
+            except ValueError:
+                tqdm.write('В XML сохранить не получилось -- '
+                           'возможно поля на русском языке')

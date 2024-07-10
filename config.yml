@@ -1,20 +1,27 @@
 query: |
-  select * from table
+  SELECT * FROM Equipment
 
-db:
-  database: postgres
-  database_server: 0.0.0.0
-  database_port: 5432
-  database_login: login
-  database_password: password
+input_file: Equipment.xlsx
+#output_file: Equipment
+#csv: True
+#xlsx: True
+#json: False
+#xml: False
+
+#db:
+#  type: mssql #mssql, pg
+#  database: IntegrationDB_BFG_TEST
+#  database_server: rk-dax-sql-dev
+#  database_port: 1433
+#  database_login: bfg-int-local
+#  database_password: RjkjybzGferjd888
 
 output_db:
-  database: postgres
-  database_server: 0.0.0.1
-  database_port: 5432
-  database_login: login
-  database_password: password
+  type: mssql # mssql, pg
+  database: IntegrationDB_BFG_TEST
+  database_server: rk-dax-sql-dev
+  database_port: 1433
+  database_login: bfg-int-local
+  database_password: RjkjybzGferjd888
   table: test
   replace: replace # replace -- заменить, append -- дописать
-
-output_file: /home/folder
