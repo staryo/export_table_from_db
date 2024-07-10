@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from logging import basicConfig, DEBUG, INFO
 from os import getcwd
 from os.path import join
+import pyodbc
 
 import pandas as pd
 from sqlalchemy import create_engine
@@ -11,6 +12,9 @@ import sqlalchemy.sql.default_comparator
 import psycopg2
 
 from version import version_description
+from urllib import parse
+
+import json
 from urllib import parse
 
 
